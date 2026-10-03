@@ -1,3 +1,5 @@
+
+
 name: Build Kernel
 
 on:
@@ -42,7 +44,15 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y ccache clang lld make git wget curl p7zip-full
+          sudo apt install -y ccache make git wget curl p7zip-full bison flex bc libssl-dev build-essential
+
+      - name: Setup zyc-clang toolchain
+        run: |
+          mkdir -p $HOME/zyc-clang
+          cd $HOME/zyc-clang
+          wget https://github.com/ZyCromerZ/Clang/releases/download/15.0.7-20251111-release/Clang-15.0.7-20251111.tar.gz
+          tar -zxvf Clang-15.0.7-20251111.tar.gz
+          cd $GITHUB_WORKSPACE
 
       - name: Prepare build environment
         run: |
