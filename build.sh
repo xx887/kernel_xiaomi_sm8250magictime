@@ -124,27 +124,27 @@ build() {
         echo Ошибка: Сборка завершилась с ошибкой
 
         if [ "$TYPE" = "early" ]; then
-            curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendMessage \
+           # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendMessage \
             -d chat_id=@magictimekernel \
             -d text="Ошибка в компиляции!" \
             -d message_thread_id=38153
 
-            curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
+           # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
             -F document=@./build.log \
             -F message_thread_id=38153
 
             if [ -s "$CHANGELOG" ]; then
-                curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
+               # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
                 -F document=@../changelog.txt \
                 -F message_thread_id=38153
             fi
         else
-            curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendMessage \
+            # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendMessage \
             -d chat_id=@magictimekernel \
             -d text="Ошибка в компиляции!" \
             -d message_thread_id=79346
 
-            curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
+            # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
             -F document=@./build.log \
             -F message_thread_id=79346
         fi            
@@ -160,28 +160,28 @@ build() {
         fi
 
         if [ "$TYPE" = "test" ]; then
-            curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
+           # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
             -F document=@./MagicTime-$DEVICE-$FILE.zip \
             -F caption="${CAPTION}" \
             -F message_thread_id=79346
         else
-            curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
+           # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
             -F document=@./MagicTime-$DEVICE-$BUILD_DATE.zip \
             -F caption="${CAPTION}" \
             -F message_thread_id=38153
         fi
 
         if [ "$TYPE" = "early" ] && [ -s "$CHANGELOG" ]; then
-            curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
+           # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
             -F document=@"$CHANGELOG" \
             -F caption="Changelog" \
             -F message_thread_id=38153
         fi
 
         if [ "$TYPE" = "test" ]; then
-            rm -rf MagicTime-$DEVICE-$FILE.zip
+           # rm -rf MagicTime-$DEVICE-$FILE.zip
         else
-            rm -rf MagicTime-$DEVICE-$BUILD_DATE.zip
+           # rm -rf MagicTime-$DEVICE-$BUILD_DATE.zip
         fi
 
         BUILD=$((BUILD + 1))
