@@ -94,5 +94,5 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: Mernel-${{ github.event.inputs.device }}-${{ github.event.inputs.target_os }}-${{ github.run_id }}
-        path:Mernel_*.zip
+        path: Mernel_*.zip
         compression-level: 0 # 已经被 zip 压缩过，无需再二次压缩
