@@ -16,9 +16,10 @@ build() {
         git clone https://github.com/osm0sis/AnyKernel3 "${MAGICTIME}/AnyKernel3"
     fi
 
-    make O="${OUT}" -j$(nproc) "${DEVICE}_defconfig"
+    make ARCH=arm64 O="${OUT}" -j$(nproc) "${DEVICE}_defconfig"
 
-    make -j$(nproc) \
+
+    make ARCH=arm64 -j$(nproc) \
         O="${OUT}" \
         CC="ccache clang" \
         HOSTCC="ccache gcc" \
