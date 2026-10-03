@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH="$HOME/zyc-clang/bin:$PATH"
 set -eo pipefail
 source ./settings.sh
 
@@ -16,19 +17,12 @@ build() {
         git clone https://github.com/osm0sis/AnyKernel3 "${MAGICTIME}/AnyKernel3"
     fi
 
-    make ARCH=arm64 O="${OUT}" -j$(nproc) "${DEVICE}_defconfig"
+    make ARCH=arm64 O="${OUT}" "${DEVICE}_defconfig"
 
-
-    make ARCH=arm64 -j$(nproc) \
-        O="${OUT}" \
-        CC="ccache clang" \
-        HOSTCC="ccache gcc" \
-        LD=ld.lld \
-        AR=llvm-ar \
-        NM=llvm-nm \
-        OBJCOPY=llvm-objcopy \
-        OBJDUMP=llvm-objdump \
-        STRIP=llvm-strip
+    make ARCH=arm64 LLVM=1 -j$(nproc) \
+    O="${OUT}" \
+    CC="ccache clang" \
+    HOSTCC="ccache gcc"
 
     cp "${OUT}/arch/arm64/boot/Image" "${MAGICTIME}/Image"
     find "${OUT}/arch/arm64/boot/dts" -name '*.dtb' -exec cat {} + > "${MAGICTIME}/dtb"
