@@ -53,6 +53,7 @@ jobs:
       - name: Run build script
         id: run_build
         run: |
+          chmod +x ./build.sh
           echo "Execute ./build.sh with args"
           ARGS=""
           if [ "${{ github.event.inputs.ksu }}" = "true" ]; then
