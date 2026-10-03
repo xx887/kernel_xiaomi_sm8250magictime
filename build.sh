@@ -17,7 +17,7 @@ build() {
         git clone https://github.com/osm0sis/AnyKernel3 "${MAGICTIME}/AnyKernel3"
     fi
     
-    rm -rf "${OUT}
+    rm -rf "${OUT}"
     
     make ARCH=arm64 O="${OUT}" "${DEVICE}_defconfig"
     
