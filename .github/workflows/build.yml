@@ -75,7 +75,7 @@ jobs:
 
     - name: Run Build Script
       run: |
-        chmod +x build_kernel.sh
+        chmod +x build.sh
         
         ARGS="${{ github.event.inputs.device }}"
         
@@ -87,12 +87,12 @@ jobs:
           ARGS="$ARGS ${{ github.event.inputs.target_os }}"
         fi
         
-        echo "Executing command: ./build_kernel.sh $ARGS"
-        ./build_kernel.sh $ARGS
+        echo "Executing command: ./build.sh $ARGS"
+        ./build.sh $ARGS
 
     - name: Upload Flashable ZIP
       uses: actions/upload-artifact@v7
       with:
-        name: APTKernel-${{ github.event.inputs.device }}-${{ github.event.inputs.target_os }}-${{ github.run_id }}
-        path: APTKernel_*.zip
+        name: Mernel-${{ github.event.inputs.device }}-${{ github.event.inputs.target_os }}-${{ github.run_id }}
+        path:Mernel_*.zip
         compression-level: 0 # 已经被 zip 压缩过，无需再二次压缩
