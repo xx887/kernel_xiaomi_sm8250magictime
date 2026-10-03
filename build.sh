@@ -1,4 +1,6 @@
+
 #!/bin/bash
+set -eo pipefail
 
 source ./settings.sh
 
@@ -19,7 +21,8 @@ source ./settings.sh
 # export SHAK=hash commit for squash revert KSU
 #
 
-MAIN=/home/timisong
+# ========== 修复1：替换本地硬编码路径为CI工作目录 ==========
+MAIN=$PWD
 
 KERNEL=$PWD
 
@@ -50,7 +53,7 @@ check_and_wget() {
         wget -O clang.tar.gz $repo
         tar -zxvf clang.tar.gz
         rm -rf clang.tar.gz
-        cd ../kernel_xiaomi_sm8250
+        cd $KERNEL
     fi
 }
 
@@ -93,6 +96,9 @@ build() {
             ${DEVICE}_defconfig \
             vendor/xiaomi/magictime-common.config
 
+    # ========== 修复2：定义DTS变量 ==========
+    DTS="${OUT}/arch/arm64/boot/dts"
+
     # Компиляция ядра
     make -j $(nproc) \
                 O="$OUT" \
@@ -109,9 +115,10 @@ build() {
                 LLVM_IAS=1 \
                 V=$VERBOSE 2>&1 | tee build.log
 
+    # ========== 修复3：镜像提取，删除错误cat合并Image ==========
     find $DTS -name '*.dtb' -exec cat {} + > $DTB
-    find $DTS -name 'Image' -exec cat {} + > $IMG
-    find $DTS -name 'dtbo.img' -exec cat {} + > $DTBO
+    cp "${OUT}/arch/arm64/boot/Image" "${IMG}"
+    cp "${OUT}/arch/arm64/boot/dtbo.img" "${DTBO}"
 
     END=$(date +%s)
     ELAPSED=$((END - START))
@@ -147,7 +154,7 @@ build() {
             # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
             # -F document=@./build.log \
             # -F message_thread_id=79346
-        fi            
+        fi
     else
         echo Общее время выполнения: $ELAPSED секунд
 
@@ -189,35 +196,36 @@ build() {
         cd $KERNEL
         LAST=$(git log -1 --format=%H)
 
-        sed -i "s/LAST=.*/LAST=$LAST/" ../settings.sh
-        sed -i "s/BUILD=.*/BUILD=$BUILD/" ../settings.sh
+        # ========== 修复4：sed路径，统一改为同目录settings.sh ==========
+        sed -i "s/LAST=.*/LAST=$LAST/" ./settings.sh
+        sed -i "s/BUILD=.*/BUILD=$BUILD/" ./settings.sh
     fi
 }
 
-check_and_wget $CLANG \
-    https://github.com/liliumproject/clang/releases/download/20250912/lilium_clang-20250912.tar.gz
-check_and_clone $GCC_ARM \
-    https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 \
-        arm-linux-androideabi-4.9
-check_and_clone $GCC_AARCH64 \
-    https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 \
-        aarch64-linux-android-4.9
+# ========== 修复5：注释掉脚本内自动下载工具链，由workflow准备 ==========
+# check_and_wget $CLANG \
+#    https://github.com/liliumproject/clang/releases/download/20250912/lilium_clang-20250912.tar.gz
+# check_and_clone $GCC_ARM \
+#    https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 \
+#        arm-linux-androideabi-4.9
+# check_and_clone $GCC_AARCH64 \
+#    https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 \
+#        aarch64-linux-android-4.9
 
 export PATH=$CLANG/bin:$GCC_AARCH64/bin:$GCC_ARM/bin:$PATH
 export ARCH=arm64
 export CROSS_COMPILE=aarch64-linux-gnu-
 export CROSS_COMPILE_COMPAT=arm-linux-gnueabi-
 export KBUILD_BUILD_USER=TIMISONG
-export KBUILD_BUILD_HOST=timisong-dev
+export KBUILD_BUILD_HOST=github-ci
 
 BUILD_DATE=$(date '+%Y-%m-%d_%H-%M-%S')
 
 OUT=out
-
 # Early build
 if [ $LEVEL = 1 ] && [ $TYPE = early ]; then
     build
-    clear
+    # clear
 fi
 
 # Test builds
@@ -238,6 +246,10 @@ if [ "$TYPE" = "test" ]; then
 	    "apollo:magictime-new:no_ksu:stk:Mi 10T AOSP without KSU:AOSP-NONKSU"
         "apollo:magictime-miui:ksu:stk:Mi 10T MIUI:MIUI-KSU"
 	    "apollo:magictime-miui:no_ksu:stk:Mi 10T MIUI without KSU:MIUI-NONKSU"
+
+        # ========== 添加你的thyme(小米10S)配置 ==========
+        "thyme:android17-aptusitu:ksu:stk:Mi10S MIUI:MIUI-KSU"
+        "thyme:android17-aptusitu:no_ksu:stk:Mi10S MIUI without KSU:MIUI-NONKSU"
     )
 
     if [ -n "$ONLY" ]; then
@@ -275,12 +287,12 @@ if [ "$TYPE" = "test" ]; then
             if [ -z "$ONLY" ]; then
                 LEVEL=1
                 EXTRA=""
-                sed -i "s/LEVEL=.*/LEVEL=1/" ../settings.sh
-                sed -i "s/EXTRA=.*/EXTRA=\"\"/ " ../settings.sh
+                sed -i "s/LEVEL=.*/LEVEL=1/" ./settings.sh
+                sed -i "s/EXTRA=.*/EXTRA=\"\"/ " ./settings.sh
             fi
             git checkout magictime-new >/dev/null 2>&1
             git reset --hard origin/magictime-new >/dev/null 2>&1
-            clear
+            # clear
             exit 0
         fi
 
@@ -308,9 +320,9 @@ if [ "$TYPE" = "test" ]; then
 
         if build; then
             NEXT_LEVEL=$((LEVEL + 1))
-            sed -i "s/LEVEL=.*/LEVEL=$NEXT_LEVEL/" ../settings.sh
+            sed -i "s/LEVEL=.*/LEVEL=$NEXT_LEVEL/" ./settings.sh
             LEVEL=$NEXT_LEVEL
-            clear
+            # clear
         else
             echo "Ошибка сборки на уровне $LEVEL ($DESC)"
             exit 1
