@@ -21,8 +21,6 @@ build() {
     
     make ARCH=arm64 O="${OUT}" "${DEVICE}_defconfig"
     
-    ./scripts/config --file "${OUT}/.config" --disable CHARGER_IDTP9415
-
     make ARCH=arm64 LLVM=1 -j$(nproc) \
     O="${OUT}" \
     CC="ccache clang" \
