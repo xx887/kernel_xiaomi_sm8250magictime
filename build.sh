@@ -141,21 +141,21 @@ build() {
            # -F message_thread_id=38153
 
             if [ -s "$CHANGELOG" ]; then
-               # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
-               # -F document=@../changelog.txt \
-               # -F message_thread_id=38153
-            fi
-        else
-            # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendMessage \
-            # -d chat_id=@magictimekernel \
-            # -d text="Ошибка в компиляции!" \
-            # -d message_thread_id=79346
+    # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
+    # -F document=@./changelog.txt \
+    # -F message_thread_id=38153
+else
+    # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendMessage \
+    # -d chat_id=@magictimekernel \
+    # -d text="Ошибка в компиляции!" \
+    # -d message_thread_id=79346
 
-            # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
-            # -F document=@./build.log \
-            # -F message_thread_id=79346
-        fi
-    else
+    # curl -s -X POST https://api.telegram.org/bot$TGTOKEN/sendDocument?chat_id=@magictimekernel \
+    # -F document=@./build.log \
+    # -F message_thread_id=79346
+fi
+
+ else
         echo Общее время выполнения: $ELAPSED секунд
 
         cd $MAGICTIME
