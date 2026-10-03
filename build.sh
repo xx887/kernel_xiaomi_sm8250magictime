@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ../settings.sh
+source ./settings.sh
 
 #
 #   settings.sh (example)
